@@ -33,11 +33,9 @@
 
 typedef struct position
 {
-	int x;
-	int y;
-	int valPos;
+	int x, y;
 
-}  POSITION;
+}POSITION;
 
 /*---------------------Parameters---------------------*/
 
@@ -124,7 +122,7 @@ void updateter()
 
 	while (1)
 	{
-		if (front != -1)
+		while(front != -1)
 		{
 			ch = ch_arr[front];
 			if (front != rear)
@@ -175,9 +173,9 @@ void updateter()
 				display_val[get_pos(x, y) / 2] = display_draft_val[y][x];
 			}
 		}
+		update_board();
 		display_attr[2000] = '\0';
 		display_val[2000] = '\0';
-		//update_board();
 	} // while(1)
 
 } // updater 
@@ -204,8 +202,8 @@ void create_cube()
 	if (cube_pos == NULL)
 		finish();
 	for (i = 0; i < CUBE_SIZE; i++) {
-		cube_pos[i].x = 61 + i;	cube_pos[i].y = 0;
-		cube_pos[i].valPos = get_pos(cube_pos[i].x, cube_pos[i].y);
+		cube_pos[i].x = 61 + i;	
+		cube_pos[i].y = 0;
 	}
 }
 
@@ -226,7 +224,6 @@ void update_cube()
 		{
 			display_draft_attr[cube_pos[i].y][cube_pos[i].x] = TRACK_COLOR;
 			cube_pos[i].x--;	cube_pos[i].y++;
-			cube_pos[i].valPos = get_pos(cube_pos[i].x, cube_pos[i].y);
 			display_draft_attr[cube_pos[i].y][cube_pos[i].x] = CUBE_COLOR;
 		}
 	}
@@ -261,12 +258,14 @@ char dir;
 void update_board()
 {
 	int x,y,pos, color;
-	for (y = 0; y <= 24; y++) {
+	for (y = 24; y >= 1; y--) {
 		for (x = MIN_X(y); x <= MAX_X(y); x++){
-			if (compare_to_ball_pos(x, y) == 0 || compare_to_cube_pos(x,y) == 0)
-				continue;
 			pos = get_pos(x, y) + 1;
-			if (pixelColorFlag == 0)
+			if (compare_to_ball_pos(x, y) == 0)
+				color = BALL_COLOR;
+			else if (compare_to_cube_pos(x, y) == 0)
+				color = CUBE_COLOR;
+			else if (pixelColorFlag == 0)
 			{
 				if (y % 2 == 0)
 					color = TRACK_COLOR;
@@ -378,7 +377,15 @@ INTPROC new_int9(int mdevno)
 					if (scan == 80)//Down
 						result = 's';
 	if ((scan == 46) && (ascii == 3)) {// Ctrl-C?
-		finish();
+		if (cube_pos != NULL)
+			freemem(cube_pos);
+		if (ball_pos != NULL)
+			freemem(ball_pos);
+		asm{
+			MOV  AX,2
+			INT  10h
+			INT	 27
+		}
 	}
 	send(receiver_pid, result);
 
@@ -439,7 +446,7 @@ int y;
 {
 	int i;
 	for (i = 0; i<BALL_SIZE; i++)
-		if (ball_pos[i].valPos == get_pos(x, y))
+		if (get_pos(ball_pos[i].x, ball_pos[i].y) == get_pos(x, y))
 			return 0;
 	return 1;
 }
@@ -450,7 +457,7 @@ int y;
 {
 	int i;
 	for (i = 0; i<CUBE_SIZE; i++)
-		if (cube_pos[i].valPos == get_pos(x, y))
+		if (get_pos(cube_pos[i].x, cube_pos[i].y) == get_pos(x, y))
 			return 0;
 	return 1;
 }
@@ -497,7 +504,6 @@ void init_board()
 	for (i = 0; i<BALL_SIZE; i++)
 	{
 		pos = get_pos(ball_pos[i].x, ball_pos[i].y);
-		ball_pos[i].valPos = pos;
 		display_draft_attr[ball_pos[i].y][ball_pos[i].x] = display_attr[pos / 2] = BALL_COLOR;
 		display_draft_val[ball_pos[i].y][ball_pos[i].x] = display_val[pos / 2] = BALL_VALUE;
 	}
@@ -525,6 +531,6 @@ void finish()
 	asm{
 		MOV  AX,2
 		INT  10h
-		INT		27
+		INT	 27
 	}
 }
