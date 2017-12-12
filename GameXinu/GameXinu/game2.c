@@ -148,8 +148,6 @@ void updateter()
 	int i, x, y, jumpingCnt = -1, trapType = -1;
 	char ch;
 
-	srand(time(NULL));   // should only be called once
-
 	while (1)
 	{
 		while (front != -1)
@@ -210,6 +208,7 @@ void updateter()
 		{
 			trapEnd = 0;
 			trapCount = 0;
+			srand(time(NULL));
 			trapType = rand() % 4;
 			switch (trapType)
 			{
@@ -326,14 +325,14 @@ void update_tunnle()
 	/*check if the tunnle reached to the end*/
 	if (tunnle[0].y >= MAX_Y)
 	{
-		/*if (tunnle[0].y == ball[1].y) {
-		if (tunnle[3].x != ball[1].x || tunnle[4].x != ball[3].x) {
-		gameOver = 1;
-		return;
+		if (tunnle[0].y == ball[1].y) {
+			if (tunnle[3].x != ball[1].x || tunnle[4].x != ball[3].x) {
+				gameOver = 1;
+				return;
+			}
+			else;
 		}
 		else;
-		}
-		else;*/
 		for (i = 0; i<TUNNLE_SIZE; i++)
 			tunnle[i].x = tunnle[i].y = -1;
 		trapEnd = 1;
@@ -355,12 +354,12 @@ void update_cube()
 	/*check if the cube reached to the end*/
 	if (cube[1].y >= MAX_Y)
 	{
-		/*if (cube[1].y == ball[1].y) {
+		if (cube[1].y == ball[1].y) {
 
-		gameOver = 1;
-		return;
+			gameOver = 1;
+			return;
 		}
-		else;*/
+		else;
 		for (i = 0; i<CUBE_SIZE; i++)
 			cube[i].x = cube[i].y = -1;
 		trapEnd = 1;
@@ -621,6 +620,7 @@ INTPROC new_int9(int mdevno)
 		else if ((scan == 46) && (ascii == 3) || scan == 1) {// Ctrl-C or Esc
 			if (cube != NULL)	freemem(cube);	else;
 			if (ball != NULL)	freemem(ball);	else;
+			TurnSpeakersOff();
 			asm{
 				MOV  AX,2
 				INT  10h			//Restore to textual mode
@@ -838,6 +838,7 @@ void game_over()
 	change_value_by_pos(pos + 1, DEAD_BALL_COLOR);
 	change_value_by_pos(pos, DEAD_BALL_VALUE);
 	}*/
+	TurnSpeakersOff();
 	kill(dispid);
 }
 
